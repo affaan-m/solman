@@ -1,0 +1,13 @@
+{
+  "name": "solman",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm -w apps/web run build",
+    "typecheck": "npm -w apps/web run typecheck",
+    "lint": "npm -w apps/web run lint"
+  }
+}
