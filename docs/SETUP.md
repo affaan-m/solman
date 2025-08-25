@@ -2,7 +2,7 @@
 
 Requirements
 - Node.js 20+
-- Supabase project (URL + anon key)
+- Supabase project (URL + anon key + service role key)
 - Privy app (APP_ID + APP_SECRET)
 
 Steps
@@ -13,6 +13,8 @@ Steps
    - Copy apps/web/.env.example to apps/web/.env.local and fill values:
      - NEXT_PUBLIC_SUPABASE_URL
      - NEXT_PUBLIC_SUPABASE_ANON_KEY
+     - SUPABASE_SERVICE_ROLE_KEY
+     - NEXT_PUBLIC_PRIVY_APP_ID
      - PRIVY_APP_ID
      - PRIVY_APP_SECRET
      - REFERRAL_COOKIE_SECRET
