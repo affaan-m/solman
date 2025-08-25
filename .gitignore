@@ -40,3 +40,4 @@ coverage/
 
 # Supabase local
 .supabase/
+apps/web/tsconfig.tsbuildinfo
