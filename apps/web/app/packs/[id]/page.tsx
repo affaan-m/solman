@@ -8,7 +8,16 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
   const [result, setResult] = useState<any>(null);
   const [spinning, setSpinning] = useState(false);
   const [cards, setCards] = useState<any[]>([]);
+  const [catalog, setCatalog] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Load items for visual filler with consistent art and rarity colors
+    fetch("/api/items")
+      .then((r) => r.json())
+      .then((items) => setCatalog(items))
+      .catch(() => setCatalog([]));
+  }, []);
 
   const startSpin = async () => {
     setSpinning(true);
@@ -21,12 +30,20 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ client_seed, nonce })
     });
     const data = await res.json();
-    const filler = Array.from({ length: 24 }).map((_, i) => ({
-      key: `f-${i}`,
+    const fillerSource = catalog.length > 0 ? catalog : Array.from({ length: 24 }).map((_, i) => ({
       name: "Mystery",
       rarity: ["mil_spec", "restricted", "classified", "covert"][i % 4],
-      art_url: "https://dummyimage.com/120x80/111/fff&text=?"
+      art_url: "https://dummyimage.com/320x200/111/fff&text=?"
     }));
+    const filler = Array.from({ length: 24 }).map((_, i) => {
+      const it = fillerSource[i % fillerSource.length];
+      return {
+        key: `f-${i}`,
+        name: it.name,
+        rarity: it.rarity,
+        art_url: it.art_url
+      };
+    });
     const list = [...filler, { key: "win", ...data.outcome }];
     setCards(list);
     setTimeout(() => {
@@ -58,9 +75,10 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
           {cards.map((c, idx) => (
             <div
               key={idx}
-              className="w-32 h-24 rounded flex items-center justify-center text-xs"
+              className="w-32 h-24 rounded overflow-hidden relative"
               style={{
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                 background:
                   c.rarity === "legendary"
                     ? "linear-gradient(135deg,#FFD70022,#FFD70008)"
@@ -74,10 +92,11 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
               }}
             >
               {c.art_url ? (
-                <Image src={c.art_url} alt={c.name} width={120} height={80} />
-              ) : (
-                <span>{c.name}</span>
-              )}
+                <Image src={c.art_url} alt={c.name} width={128} height={96} className="object-cover w-full h-full" />
+              ) : null}
+              <div className="absolute bottom-0 left-0 right-0 text-[10px] px-1 py-0.5 bg-black/40 backdrop-blur-sm truncate">
+                {c.name}
+              </div>
             </div>
           ))}
         </motion.div>
