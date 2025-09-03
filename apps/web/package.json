@@ -12,7 +12,8 @@
     "gen:first5": "node ./scripts/generate_first_five.mjs",
     "gen:first5:local": "SHEET_CSV_URL=\"$SHEET_CSV_URL\" FAL_KEY=\"$FAL_KEY\" node ./scripts/generate_first_five.mjs",
     "cards:first5": "node ./scripts/generate_first5_cards.mjs",
-    "cards:first5:local": "BASE_URL=\"http://localhost:3000\" node ./scripts/generate_first5_cards.mjs"
+    "cards:first5:local": "BASE_URL=\"http://localhost:3000\" node ./scripts/generate_first5_cards.mjs",
+    "cards:first5:edit": "SHEET_CSV_URL=\"$SHEET_CSV_URL\" FAL_KEY=\"$FAL_KEY\" node ./scripts/generate_first5_cards_via_edit.mjs"
   },
   "dependencies": {
     "next": "14.2.30",
