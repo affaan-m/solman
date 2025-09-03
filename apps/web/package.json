@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:first5": "node ./scripts/generate_first_five.mjs",
+    "gen:first5:local": "SHEET_CSV_URL=\"$SHEET_CSV_URL\" FAL_KEY=\"$FAL_KEY\" node ./scripts/generate_first_five.mjs"
   },
   "dependencies": {
     "next": "14.2.30",
