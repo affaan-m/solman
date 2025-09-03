@@ -1,5 +1,4 @@
 import { ImageResponse, NextRequest } from "next/server";
-import { getItems } from "@/lib/itemsSource";
 
 export const runtime = "edge";
 
@@ -27,7 +26,9 @@ function mapRarityToTier(rarity: string): keyof typeof rarityPalette {
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const slug = params.slug;
-  const items = await getItems();
+  const origin = req.nextUrl.origin;
+  const itemsRes = await fetch(`${origin}/api/items`, { cache: "no-store" });
+  const items = (await itemsRes.json()) as any[];
   const item = items.find((it) => it.slug === slug);
   if (!item) return new Response("not_found", { status: 404 });
 

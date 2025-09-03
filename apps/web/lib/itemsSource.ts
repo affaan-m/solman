@@ -157,8 +157,15 @@ async function generateServiceAccountJwt(
   const encClaim = base64url(JSON.stringify(claim));
   const toSign = `${encHeader}.${encClaim}`;
 
-  const crypto = await import("crypto");
-  const sign = crypto.createSign("RSA-SHA256");
+  // Use WebCrypto if available (Edge), otherwise node crypto
+  // @ts-ignore
+  const isWeb = typeof crypto !== "undefined" && typeof (crypto as any).subtle !== "undefined";
+  if (isWeb) {
+    // WebCrypto path is non-trivial for PEM; fall back to unauthenticated flows elsewhere.
+    throw new Error("Service account JWT not supported on edge runtime; use API key or published CSV.");
+  }
+  const nodeCrypto = await import("crypto");
+  const sign = nodeCrypto.createSign("RSA-SHA256");
   sign.update(toSign);
   sign.end();
   const signature = sign.sign(privateKey);
