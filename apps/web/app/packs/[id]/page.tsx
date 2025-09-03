@@ -9,15 +9,30 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
   const [spinning, setSpinning] = useState(false);
   const [cards, setCards] = useState<any[]>([]);
   const [catalog, setCatalog] = useState<any[]>([]);
+  const [slugToItem, setSlugToItem] = useState<Record<string, any>>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Load items for visual filler with consistent art and rarity colors
     fetch("/api/items")
       .then((r) => r.json())
-      .then((items) => setCatalog(items))
+      .then((items) => {
+        setCatalog(items);
+        const map: Record<string, any> = {};
+        for (const it of items) map[it.slug] = it;
+        setSlugToItem(map);
+      })
       .catch(() => setCatalog([]));
   }, []);
+
+  const sideviewFor = (item: any) => {
+    const toKey = (s: string) => (s || "").replace(/\s+/g, "-").replace(/[^A-Za-z0-9\-]/g, "");
+    const weapon = toKey(item.weapon || "");
+    const skin = toKey(item.skin_family || "");
+    if (!weapon || !skin) return item.art_url;
+    const combo = `${weapon}-${skin}`;
+    return `/branding/cs2_skin_sideviews/${combo}/${combo}_s82.png`;
+  };
 
   const startSpin = async () => {
     setSpinning(true);
@@ -41,10 +56,18 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
         key: `f-${i}`,
         name: it.name,
         rarity: it.rarity,
-        art_url: it.art_url
+        art_url: it.weapon && it.skin_family ? sideviewFor(it) : it.art_url
       };
     });
-    const list = [...filler, { key: "win", ...data.outcome }];
+    // Attach sideview art for the winning item if we can resolve via slug
+    let win = { key: "win", ...data.outcome } as any;
+    if (data.outcome?.item_template_slug && slugToItem[data.outcome.item_template_slug]) {
+      const base = slugToItem[data.outcome.item_template_slug];
+      win.art_url = sideviewFor(base);
+      if (!win.name) win.name = base.name;
+      if (!win.rarity) win.rarity = base.rarity;
+    }
+    const list = [...filler, win];
     setCards(list);
     setTimeout(() => {
       setResult(data);

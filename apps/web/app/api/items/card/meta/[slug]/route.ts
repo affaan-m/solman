@@ -82,6 +82,26 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
             }}
           />
 
+          {/* Optional: sideview silhouette if present in branding assets */}
+          <div
+            style={{
+              position: "absolute",
+              right: 40,
+              top: 140,
+              width: 720,
+              height: 320,
+              opacity: 0.18,
+              filter: "grayscale(100%)",
+              mixBlendMode: "screen",
+              backgroundImage: `url(/branding/cs2_skin_sideviews/${encodeURIComponent(
+                (item.weapon + '-' + item.skin_family).replace(/\s+/g, '-').replace(/[^A-Za-z0-9\-]/g, '')
+              )}/${encodeURIComponent((item.weapon + '-' + item.skin_family).replace(/\s+/g, '-').replace(/[^A-Za-z0-9\-]/g, ''))}_s82.png)`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right center",
+            }}
+          />
+
           {/* Header with logo and rarity pill */}
           <div
             style={{
