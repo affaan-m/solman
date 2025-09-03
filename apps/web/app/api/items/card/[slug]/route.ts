@@ -28,9 +28,10 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
   const origin = req.nextUrl.origin;
   const providedImage = req.nextUrl.searchParams.get("image") || "";
+  const localEdited = `${origin}/cards_edit/${encodeURIComponent(slug)}.jpg`;
   const localGenerated = `${origin}/generated/${encodeURIComponent(slug)}.jpg`;
   const fallbackArt = item.art_url;
-  const imageUrl = providedImage || localGenerated || fallbackArt;
+  const imageUrl = providedImage || localEdited || localGenerated || fallbackArt;
 
   const { from, to } = rarityColors(item.rarity);
 
@@ -131,24 +132,48 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
               left: 0,
               right: 0,
               bottom: 0,
-              height: 190,
+              height: 220,
               background: "linear-gradient(to top, rgba(0,0,0,0.68), rgba(0,0,0,0))",
               display: "flex",
               alignItems: "flex-end"
             }}
           >
-            <div style={{ padding: 24, width: "100%", display: "flex", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", flexDirection: "column", maxWidth: innerW - 240 }}>
-                <div style={{ fontSize: 42, fontWeight: 800, color: "#fff", lineHeight: 1.15 }}>{item.name}</div>
-                <div style={{ fontSize: 24, color: "#D0D4DA" }}>
-                  {item.condition} • float {Number(item.float).toFixed(4)}
-                  {item.stattrak ? " • StatTrak" : ""}
-                  {item.pattern_seed ? ` • Pattern ${item.pattern_seed}` : ""}
+            <div style={{ padding: 24, width: "100%", display: "flex", justifyContent: "space-between", gap: 16 }}>
+              <div style={{ display: "flex", flexDirection: "column", maxWidth: innerW - 340 }}>
+                <div style={{ fontSize: 42, fontWeight: 900, color: "#FFFFFF", lineHeight: 1.1 }}>{item.name}</div>
+                <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8 }}>
+                  <div
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 999,
+                      fontSize: 18,
+                      fontWeight: 700,
+                      color: "#0b0d0f",
+                      background: `linear-gradient(135deg, ${from}, ${to})`,
+                      border: "1px solid rgba(255,255,255,0.25)"
+                    }}
+                  >
+                    {item.rarity}
+                  </div>
+                  <div style={{ fontSize: 20, color: "#D0D4DA" }}>{item.condition}</div>
+                  <div style={{ fontSize: 20, color: "#D0D4DA" }}>float {Number(item.float).toFixed(4)}</div>
+                  {item.pattern_seed ? (
+                    <div style={{ fontSize: 20, color: "#D0D4DA" }}>pattern {item.pattern_seed}</div>
+                  ) : null}
+                  {item.stattrak ? (
+                    <div style={{ fontSize: 18, color: "#F39C12", fontWeight: 700 }}>StatTrak</div>
+                  ) : null}
                 </div>
+                {item.stickers ? (
+                  <div style={{ marginTop: 6, fontSize: 18, color: "#C2C7CF", opacity: 0.95 }}>Stickers: {item.stickers}</div>
+                ) : null}
               </div>
-              <div style={{ textAlign: "right", color: "#D0D4DA", fontSize: 20 }}>
-                <div>{item.weapon}</div>
-                {item.stickers ? <div style={{ opacity: 0.9 }}>Stickers: {item.stickers}</div> : null}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", minWidth: 300 }}>
+                <div style={{ fontSize: 18, color: "#AEB6C2" }}>Estimated Value</div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: "#FFFFFF" }}>
+                  ${((item as any).est_value_cents ? (item as any).est_value_cents / 100 : 0).toFixed(2)}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 18, color: "#AEB6C2" }}>{item.weapon}</div>
               </div>
             </div>
           </div>
