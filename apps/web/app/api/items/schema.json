@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ItemRecord",
+  "type": "object",
+  "required": [
+    "slug",
+    "name",
+    "weapon",
+    "skin_family",
+    "rarity",
+    "condition",
+    "float",
+    "est_value_cents",
+    "art_url"
+  ],
+  "properties": {
+    "slug": { "type": "string" },
+    "name": { "type": "string" },
+    "weapon": { "type": "string" },
+    "skin_family": { "type": "string" },
+    "rarity": { "type": "string", "enum": ["mil_spec", "restricted", "classified", "covert", "legendary"] },
+    "condition": { "type": "string" },
+    "float": { "type": "number" },
+    "est_value_cents": { "type": "number" },
+    "art_url": { "type": "string" },
+    "pattern_seed": { "type": ["number", "null"] },
+    "stattrak": { "type": ["boolean", "null"] },
+    "stickers": { "type": ["string", "null"] },
+    "asset_id": { "type": ["string", "null"] },
+    "redemption_date": { "type": ["string", "null"] }
+  }
+}

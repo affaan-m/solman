@@ -2,11 +2,10 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "dummyimage.com",
-        pathname: "/**"
-      }
+      { protocol: "https", hostname: "dummyimage.com", pathname: "/**" },
+      { protocol: "https", hostname: "arweave.net", pathname: "/**" },
+      { protocol: "https", hostname: "gateway.pinata.cloud", pathname: "/**" },
+      { protocol: "https", hostname: "ipfs.io", pathname: "/**" }
     ]
   }
 };

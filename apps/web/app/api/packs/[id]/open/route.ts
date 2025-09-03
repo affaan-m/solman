@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import packs from "@/data/packs.json";
-import items from "@/data/items.json";
+import { getItems } from "@/lib/itemsSource";
 import { solveLambda, tieredProbs, cdf, sampleIndexFromRoll } from "@/lib/evSampler";
 
 function hmacToRoll(serverSeed: string, clientSeed: string, nonce: number) {
@@ -27,6 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "pack_not_found" }, { status: 404 });
   }
 
+  const items = await getItems();
   const pool = (items as any[]).filter((it) => pack.pool_slugs.includes(it.slug));
   if (pool.length === 0) {
     return NextResponse.json({ error: "empty_pack_pool" }, { status: 400 });
