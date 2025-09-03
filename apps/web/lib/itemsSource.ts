@@ -215,6 +215,13 @@ function parseRowsToItems(rows: string[][]): ItemRecord[] {
   if (!rows || rows.length === 0) return [];
   const header = rows[0].map((h) => normalizeHeader(h));
   const idx = (name: string) => header.indexOf(name);
+  const aliasIdx = (names: string[]) => {
+    for (const n of names) {
+      const i = header.indexOf(n);
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
 
   const iName = idx("name");
   const iWeapon = idx("weapon");
@@ -227,8 +234,8 @@ function parseRowsToItems(rows: string[][]): ItemRecord[] {
   const iStickers = idx("stickers");
   const iRedemption = idx("redemption_date");
   const iAssetId = idx("asset_id");
-  const iPrice = idx("price");
-  const iImage = idx("image_link") >= 0 ? idx("image_link") : idx("image");
+  const iPrice = aliasIdx(["price", "price_usd", "price_priceempire_api", "price_priceempire"]);
+  const iImage = aliasIdx(["image_link_arweave", "image_link", "image_url", "image"]);
 
   const items: ItemRecord[] = [];
   for (let r = 1; r < rows.length; r++) {
