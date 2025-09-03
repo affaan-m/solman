@@ -1,0 +1,164 @@
+import { ImageResponse, NextRequest } from "next/server";
+import { getItems } from "@/lib/itemsSource";
+
+export const runtime = "edge";
+
+function rarityColors(rarity: string) {
+  switch (rarity) {
+    case "legendary":
+      return { from: "#FFD700", to: "#8A6D1A" };
+    case "covert":
+      return { from: "#E74C3C", to: "#8E2A22" };
+    case "classified":
+      return { from: "#9B59B6", to: "#5E3370" };
+    case "restricted":
+      return { from: "#4C6FFF", to: "#2B3D99" };
+    default:
+      return { from: "#B0B0B0", to: "#6E6E6E" };
+  }
+}
+
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+  const slug = params.slug;
+  const items = await getItems();
+  const item = items.find((it) => it.slug === slug);
+  if (!item) {
+    return new Response("not_found", { status: 404 });
+  }
+
+  const origin = req.nextUrl.origin;
+  const providedImage = req.nextUrl.searchParams.get("image") || "";
+  const localGenerated = `${origin}/generated/${encodeURIComponent(slug)}.jpg`;
+  const fallbackArt = item.art_url;
+  const imageUrl = providedImage || localGenerated || fallbackArt;
+
+  const { from, to } = rarityColors(item.rarity);
+
+  const width = 1200;
+  const height = 700;
+  const pad = 24;
+  const innerW = width - pad * 2;
+  const innerH = height - pad * 2;
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          display: "flex",
+          background: `linear-gradient(135deg, ${from}, ${to})`,
+          padding: `${pad}px`,
+          boxSizing: "border-box",
+          fontFamily: "Inter, ui-sans-serif, system-ui"
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: `${innerW}px`,
+            height: `${innerH}px`,
+            borderRadius: 20,
+            display: "flex",
+            background: "#0b0d0f",
+            boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.06)"
+          }}
+        >
+          {/* Skin image */}
+          <img
+            src={imageUrl}
+            alt={item.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: 0.96
+            }}
+          />
+
+          {/* Subtle vignette */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(120% 120% at 50% 40%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.35) 100%)"
+            }}
+          />
+
+          {/* Header bar with logo */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              height: 130,
+              background: "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0))",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "16px 24px"
+            }}
+          >
+            <img
+              src={`${origin}/branding/solman.gg.logo.faceonly.jpg`}
+              width={96}
+              height={96}
+              style={{ borderRadius: 12, objectFit: "cover" }}
+            />
+            <div
+              style={{
+                padding: "10px 18px",
+                borderRadius: 999,
+                fontSize: 24,
+                fontWeight: 700,
+                color: "#0b0d0f",
+                background: `linear-gradient(135deg, ${from}, ${to})`,
+                border: "1px solid rgba(255,255,255,0.2)"
+              }}
+            >
+              {item.rarity}
+            </div>
+          </div>
+
+          {/* Bottom info bar */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 190,
+              background: "linear-gradient(to top, rgba(0,0,0,0.68), rgba(0,0,0,0))",
+              display: "flex",
+              alignItems: "flex-end"
+            }}
+          >
+            <div style={{ padding: 24, width: "100%", display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column", maxWidth: innerW - 240 }}>
+                <div style={{ fontSize: 42, fontWeight: 800, color: "#fff", lineHeight: 1.15 }}>{item.name}</div>
+                <div style={{ fontSize: 24, color: "#D0D4DA" }}>
+                  {item.condition} • float {Number(item.float).toFixed(4)}
+                  {item.stattrak ? " • StatTrak" : ""}
+                  {item.pattern_seed ? ` • Pattern ${item.pattern_seed}` : ""}
+                </div>
+              </div>
+              <div style={{ textAlign: "right", color: "#D0D4DA", fontSize: 20 }}>
+                <div>{item.weapon}</div>
+                {item.stickers ? <div style={{ opacity: 0.9 }}>Stickers: {item.stickers}</div> : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      width,
+      height,
+      headers: { "Content-Type": "image/png" }
+    }
+  );
+}
