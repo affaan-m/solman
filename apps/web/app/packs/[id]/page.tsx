@@ -11,6 +11,7 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
   const [catalog, setCatalog] = useState<any[]>([]);
   const [slugToItem, setSlugToItem] = useState<Record<string, any>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const [winningIndex, setWinningIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // Load items for visual filler with consistent art and rarity colors
@@ -37,6 +38,7 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
   const startSpin = async () => {
     setSpinning(true);
     setResult(null);
+    setWinningIndex(null);
     const client_seed = "web-demo";
     const nonce = Date.now();
     const res = await fetch(`/api/packs/${params.id}/open`, {
@@ -69,13 +71,24 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
     }
     const list = [...filler, win];
     setCards(list);
+    setWinningIndex(list.length - 1);
     setTimeout(() => {
       setResult(data);
       setSpinning(false);
     }, 1400);
   };
 
-  const trackWidth = useMemo(() => cards.length * 140, [cards.length]);
+  const CARD_SLOT = 136; // ~128px card + 8px gap
+  const trackWidth = useMemo(() => cards.length * CARD_SLOT, [cards.length]);
+  const targetOffset = useMemo(() => {
+    if (winningIndex == null) return 0;
+    const containerWidth = containerRef.current?.clientWidth ?? 0;
+    const centerX = containerWidth / 2;
+    const winningCenter = winningIndex * CARD_SLOT + CARD_SLOT / 2;
+    // Adjust for the slight left padding (left-2) of the strip
+    const leftPadding = 8;
+    return -(winningCenter + leftPadding - centerX);
+  }, [winningIndex, cards.length]);
 
   return (
     <div className="space-y-6">
@@ -91,8 +104,8 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
       <div className="overflow-hidden border border-white/10 rounded h-32 relative" ref={containerRef}>
         <motion.div
           className="flex items-center gap-2 absolute left-2 top-2"
-          animate={{ x: spinning ? -trackWidth : 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          animate={{ x: spinning && winningIndex != null ? targetOffset : 0 }}
+          transition={{ duration: 2.6, ease: [0.17, 0.67, 0.14, 0.93] }}
           style={{ width: trackWidth }}
         >
           {cards.map((c, idx) => (
@@ -124,6 +137,7 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
           ))}
         </motion.div>
         <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/40 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
       </div>
 
       {result && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from "next/link";
 import { ShieldCheck, Zap } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -38,8 +39,16 @@ export default function GachaMachineCenter() {
             </div>
           </div>
 
-          <button onClick={handleSpin} disabled={isSpinning} className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-orange-600/25 mb-4">
-            {isSpinning ? 'OPENING...' : 'OPEN CASE'}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Link href="/packs/starter" className="text-center bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-orange-600/25">
+              Open Starter
+            </Link>
+            <Link href="/packs/premium" className="text-center bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-fuchsia-600/25">
+              Open Premium
+            </Link>
+          </div>
+          <button onClick={handleSpin} disabled={isSpinning} className="w-full bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">
+            {isSpinning ? 'OPENING...' : 'Demo Spin'}
           </button>
         </div>
 
