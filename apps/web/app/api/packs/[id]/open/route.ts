@@ -19,6 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const nonce = Number(body.nonce) || 0;
 
   try {
+    const requestId = crypto.randomUUID();
     const serverSeed = crypto.randomBytes(32).toString("hex");
     const serverSeedHash = crypto.createHash("sha256").update(serverSeed).digest("hex");
 
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const chosen = pool[idx];
 
     console.log("[packs/open] outcome", {
+      request_id: requestId,
       packId: params.id,
       server_seed_hash: serverSeedHash,
       client_seed: clientSeed,
@@ -62,6 +64,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     return NextResponse.json({
       pack_id: params.id,
+      request_id: requestId,
       server_seed_hash: serverSeedHash,
       reveal: {
         server_seed: serverSeed,
