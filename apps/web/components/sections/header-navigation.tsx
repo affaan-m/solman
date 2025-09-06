@@ -46,7 +46,7 @@ export default function HeaderNavigation() {
     <>
       <header
         className={cn(
-          "w-full flex justify-between items-center fixed top-0 z-50 p-4 py-3 sm:px-12 sm:py-4 transition-all duration-300",
+          "w-full flex justify-between items-center p-4 py-3 sm:px-12 sm:py-4 transition-all duration-300",
           isScrolled || isMenuOpen
             ? "bg-slate-900/90 backdrop-blur-sm border-b border-orange-600/20"
             : "bg-transparent border-b border-transparent"

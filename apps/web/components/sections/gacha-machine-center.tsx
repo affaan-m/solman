@@ -43,7 +43,7 @@ export default function GachaMachineCenter() {
           </button>
         </div>
 
-        <div className="absolute top-[20px] -right-8 flex flex-col gap-3">
+        <div className="absolute top-[20px] -right-8 hidden md:flex flex-col gap-3">
           <TooltipProvider>
             {cases.map(c => (
               <Tooltip key={c.id} delayDuration={100}>
