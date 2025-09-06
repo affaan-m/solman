@@ -41,12 +41,14 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
     setWinningIndex(null);
     const client_seed = "web-demo";
     const nonce = Date.now();
+    console.log("[ui/open] start", { packId: params.id, client_seed, nonce });
     const res = await fetch(`/api/packs/${params.id}/open`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ client_seed, nonce })
     });
     const data = await res.json();
+    console.log("[ui/open] outcome", data);
     const fillerSource = catalog.length > 0 ? catalog : Array.from({ length: 24 }).map((_, i) => ({
       name: "Mystery",
       rarity: ["mil_spec", "restricted", "classified", "covert"][i % 4],
