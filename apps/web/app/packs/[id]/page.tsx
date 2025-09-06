@@ -8,6 +8,7 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
   const [result, setResult] = useState<any>(null);
   const [spinning, setSpinning] = useState(false);
   const [cards, setCards] = useState<any[]>([]);
+  const [offsetX, setOffsetX] = useState<number>(0);
   const [catalog, setCatalog] = useState<any[]>([]);
   const [slugToItem, setSlugToItem] = useState<Record<string, any>>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,10 +75,17 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
     const list = [...filler, win];
     setCards(list);
     setWinningIndex(list.length - 1);
-    setTimeout(() => {
+    // Persist final offset after animation ends
+    const containerWidth = containerRef.current?.clientWidth ?? 0;
+    const centerX = containerWidth / 2;
+    const leftPadding = 8;
+    const finalOffset = -((list.length - 1) * CARD_SLOT + CARD_SLOT / 2 + leftPadding - centerX);
+    // Schedule update after animation duration
+    window.setTimeout(() => {
+      setOffsetX(finalOffset);
       setResult(data);
       setSpinning(false);
-    }, 1400);
+    }, 2600);
   };
 
   const CARD_SLOT = 136; // ~128px card + 8px gap
@@ -106,7 +114,7 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
       <div className="overflow-hidden border border-white/10 rounded h-32 relative" ref={containerRef}>
         <motion.div
           className="flex items-center gap-2 absolute left-2 top-2"
-          animate={{ x: spinning && winningIndex != null ? targetOffset : 0 }}
+          animate={{ x: spinning && winningIndex != null ? targetOffset : offsetX }}
           transition={{ duration: 2.6, ease: [0.17, 0.67, 0.14, 0.93] }}
           style={{ width: trackWidth }}
         >
@@ -130,7 +138,16 @@ export default function PackOpenPage({ params }: { params: { id: string } }) {
               }}
             >
               {c.art_url ? (
-                <Image src={c.art_url} alt={c.name} width={128} height={96} className="object-cover w-full h-full" />
+                <Image
+                  src={c.art_url}
+                  alt={c.name}
+                  width={128}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://dummyimage.com/320x200/111/fff&text=?";
+                  }}
+                />
               ) : null}
               <div className="absolute bottom-0 left-0 right-0 text-[10px] px-1 py-0.5 bg-black/40 backdrop-blur-sm truncate">
                 {c.name}

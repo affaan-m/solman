@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import packs from "@/data/packs.json";
 import { getItems } from "@/lib/itemsSource";
-import { solveLambda, tieredProbs, cdf, sampleIndexFromRoll } from "@/lib/evSampler";
+import { solveLambda, tieredProbs, cdf, sampleIndexFromRoll, normalize, weights } from "@/lib/evSampler";
 
 function hmacToRoll(serverSeed: string, clientSeed: string, nonce: number) {
   const h = crypto.createHmac("sha256", serverSeed);
@@ -41,14 +41,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const values = pool.map((it) => it.est_value_cents as number);
     const targetEV = Math.max(0, (1 - (pack.target_edge ?? 0.1)) * (pack.price_cents as number));
     const lambda = solveLambda(values, targetEV);
-    const probs = tieredProbs(
-      pool.map((it) => ({ slug: it.slug, est_value_cents: it.est_value_cents, rarity: it.rarity })),
-      pack.rarity_mass,
-      lambda
-    );
+    // EV-driven probabilities without rarity tier enforcement
+    const probs = normalize(weights(values, lambda));
     const C = cdf(probs);
     const idx = sampleIndexFromRoll(C, roll);
     const chosen = pool[idx];
+    const chosenProb = probs[idx] ?? 0;
 
     console.log("[packs/open] outcome", {
       request_id: requestId,
@@ -58,6 +56,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       nonce,
       roll,
       item_template_slug: chosen?.slug,
+      chosen_prob: chosenProb,
       value_cents: chosen?.est_value_cents,
       duration_ms: Date.now() - start
     });
@@ -79,6 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         condition: chosen.condition,
         float: chosen.float,
         value_cents: chosen.est_value_cents,
+        prob: chosenProb,
         art_url: chosen.art_url
       }
     });
